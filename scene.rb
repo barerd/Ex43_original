@@ -1,3 +1,5 @@
+require "./creature.rb"
+
 class Scene
   attr_reader :name, :monsters, :armors, :weapons
   def initialize(name, intro, monsters, armors, weapons, engine)
@@ -37,7 +39,8 @@ What do you want to do?
     elsif choice == "2"
       take_weapon
     elsif choice == "3"
-      @engine.battle(@monsters[rand(2)])
+      monster = Creature.new(@monsters[rand(2)])
+      @engine.battle(monster)
     elsif choice == "4"
       @engine.gone
     else

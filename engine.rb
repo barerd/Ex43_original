@@ -4,13 +4,14 @@ require "./scene.rb"
 require "./wallet.rb"
 
 class Engine
-  attr_reader :hero
+  attr_reader :hero, :rat, :skeleton, :thief, :dragon
   def initialize
-    @hero = Hero.new("Hero", 100, 20, 10, 5)
-    @rat = Creature.new("Rat", 10, 2, 1)
-    @skeleton = Creature.new("Skeleton", 30, 6, 4)
-    @thief = Creature.new("Thief", 100, 30, 5)
-    @dragon = Creature.new("Dragon", 1000, 200, 100)
+    @hero = Creature.new(:name => "Hero", :life => 100, :attack => 20, :defense => 20, :regen => 20, :armor => 0, :weapon => 0)
+    @monsters = {
+    rat: {name: "Rat", life: 10, attack: 2, defense: 1, regen: 0, armor: 0, weapon: 0},
+    skeleton: {name: "Skeleton", life: 30, attack: 6, defense: 4, regen: 0, armor: 0, weapon: 0},
+    thief: {name: "Thief", life: 100, attack: 30, defense: 5, regen: 0, armor: 0, weapon: 0},
+    dragon: {name: "Dragon", life: 1000, attack: 200, defense: 100, regen: 0, armor: 0, weapon: 0}}
     @armors = [{:name => "Leather armor", :value => 5},
                {:name => "Chain mail", :value => 10},
                {:name => "Plate mail", :value => 15},
@@ -19,9 +20,9 @@ class Engine
                {:name => "Long sword", :value => 10},
                {:name => "Two-Handed sword", :value => 15},
                {:name => "Warhammer", :value => 100},]
-    @city = Scene.new("City", "The city of Casablanca..", [@rat, @thief], @armors[0,2], @weapons[0,2], self)
-    @plains = Scene.new("Plains", "The plains are dangerous places..", [@rat, @thief], @armors[1,2], @weapons[1,2], self)
-    @mountains = Scene.new("Mountains", "These mountains hide the curse of this beautiful city..", [@rat, @thief], @armors[2,2], @weapons[2,2], self)
+    @city = Scene.new("City", "The city of Casablanca..", [@monsters[:rat], @monsters[:thief]], @armors[0,2],  @weapons[0,2], self)
+    @plains = Scene.new("Plains", "The plains are dangerous places..", [@monsters[:thief], @monsters[:skeleton]], @armors[1,2], @weapons[1,2], self)
+    @mountains = Scene.new("Mountains", "These mountains hide the curse of this beautiful city..", [@monsters[:skeleton], @monsters[:dragon]], @armors[2,2], @weapons[2,2], self)
     @wallet = Wallet.new(200)
     @scenes = {:city => @city, :plains => @plains, :mountains => @mountains}
   end
@@ -60,11 +61,17 @@ Where do you wanna go?
       attacker = opponents[i % 2]
       defender = opponents[(i+1) % 2]
 
-      damage = attacker.attack
-      defender.life -= (damage - defender.defense)
-      puts "#{attacker.name} hits #{defender.name} for #{damage} points, but #{defender.name} absorbs #{defender.defense} of it."
-
-      if defender.life < 0
+      damage = attacker.attack + attacker.weapon - defender.defense
+      if damage > 0
+        defender.life -= damage
+        puts "#{attacker.name} hits #{defender.name} for #{damage} points of life."
+      else
+        puts "#{attacker.name} couldn't damage #{defender.name}."
+      end
+      if defender.life < 0 && defender.name == "Hero"
+        puts "You died, idiot!"
+        exit
+      elsif defender.life < 0 && defender.name != "Hero"
         break
       end
       if defender.name == "Hero"

@@ -1,5 +1,5 @@
 TODO:
 
-Monsters stay at the last hit point after fought.
+Monsters stay at the last hit point after fought. (DONE @28.03.2012)
 Items(weapons and armor) get lost after used.
 Separate classes for items so that each or some of the items may have different abilities.
